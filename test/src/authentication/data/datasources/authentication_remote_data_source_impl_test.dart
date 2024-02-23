@@ -4,6 +4,9 @@ import 'package:mocktail/mocktail.dart';
 import 'package:http/http.dart' as http;
 import 'package:tdd_tutorial/core/errors/exception.dart';
 import 'package:tdd_tutorial/src/authentication/data/datasources/authentication_remote_data_source.dart';
+import 'package:tdd_tutorial/src/authentication/data/models/user_model.dart';
+
+import '../../../../fixtures/fixture_reader.dart';
 
 class MockHttpClient extends Mock implements http.Client {}
 void main() {
@@ -88,5 +91,47 @@ void main() {
       )).called(1);
     }); 
   });
+   group('getUsers', () {
+    final tUserModel =UserModel.empty();
+
+    test('should complete successfully when the status code is 200 or 201', () async {
+      //arrange
+      when(() => client.get(any())
+      ).thenAnswer((_) async => http.Response(jsonEncode([tUserModel.toMap()]), 200));
+      //act
+      final call = remoteDataSource.getUsers();
+      //assert
+      expectLater(call, completes);
+
+      verify(() => client.get(Uri.parse(kAuthenticationUrl))).called(1);
+      
+    });
+
+    test('should return [ApiException] when status code is not 200', () async {
+      //arrange
+      when(() => client.get(any())
+      ).thenAnswer((_) async => http.Response('api error',500));
+      //act
+      final call = remoteDataSource.getUsers();
+      //assert
+      expectLater(call, throwsA(ApiException(message: 'api error', statusCode: 500)));
+
+      verify(() => client.get(Uri.parse(kAuthenticationUrl))).called(1);
+      
+    });
+
+    test('should return [ApiException] when http call fails', () async {
+      //arrange
+      when(() => client.get(any())
+      ).thenThrow(Exception());
+      //act
+      final call = remoteDataSource.getUsers();
+      //assert
+      expectLater(call, throwsA(ApiException(message: 'Unknown error', statusCode: 500)));
+
+      verify(() => client.get(Uri.parse(kAuthenticationUrl))).called(1);
+      
+    });
+});
   
 }

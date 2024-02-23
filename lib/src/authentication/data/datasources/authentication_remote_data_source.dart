@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart';
 import 'package:tdd_tutorial/core/utils/constants.dart';
+import 'package:tdd_tutorial/core/utils/typedef.dart';
 import 'package:tdd_tutorial/src/authentication/data/models/user_model.dart';
 
 import '../../../../core/errors/exception.dart';
@@ -32,7 +33,7 @@ class AuthenticationRemoteDataSourceImpl implements AuthenticationRemoteDataSour
           })
       );
       if(response.statusCode != 200 && response.statusCode != 201 ) {
-        print(response);
+
         throw ApiException(
           message: response.body, 
           statusCode: response.statusCode
@@ -41,7 +42,7 @@ class AuthenticationRemoteDataSourceImpl implements AuthenticationRemoteDataSour
     } on ApiException{
         rethrow;
     } on Exception {
-        throw ApiException(
+        throw const ApiException(
           message:'Unknown error', 
           statusCode: 500
         );
@@ -49,9 +50,28 @@ class AuthenticationRemoteDataSourceImpl implements AuthenticationRemoteDataSour
   }
 
   @override
-  Future<List<UserModel>> getUsers() {
-    // TODO: implement getUsers
-    throw UnimplementedError();
+  Future<List<UserModel>> getUsers() async {
+    try {
+      Response response = await _client.get(Uri.parse(kAuthenticationUrl));
+      if(response.statusCode == 200) {
+        return List<DataMap>.from((jsonDecode(response.body) as List))
+                        .map((userData) => UserModel.fromMap(userData))
+                        .toList();
+      } else {
+          throw ApiException(
+            message: response.body, 
+            statusCode: response.statusCode
+          );
+      }
+
+    } on ApiException {
+      rethrow;
+    } on Exception {
+        throw const ApiException(
+          message:'Unknown error', 
+          statusCode: 500
+        );
+    }
   }
   
 }
