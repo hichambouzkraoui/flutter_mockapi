@@ -35,8 +35,14 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
       );
   }
 
-  _getUserEventHandler(event,emit) {
-    
+  _getUserEventHandler(event,emit) async {
+    emit(GettingUsers());
+    final Either<Failure,List<User>> result = await getUsers();
+    result.fold(
+      (failure) => emit(AuthenticationError(failure.message)), 
+      (users) => emit(UsersLoaded(users))
+    );
+
   }
   
 }

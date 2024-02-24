@@ -17,7 +17,7 @@ class UserCreated extends AuthenticationState {}
 class UsersLoaded extends AuthenticationState {
   final List<User> users;
   
-  const UsersLoaded({required this.users});
+  const UsersLoaded(this.users);
   
   @override
   List<Object> get props => users.map((user) => user.id).toList();
