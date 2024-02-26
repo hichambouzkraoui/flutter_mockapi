@@ -23,7 +23,7 @@ void main() {
     const avatar = 'whatever.avatar';
     test('should complete successfully when the status code is 200 or 201', () async {
       //arrange
-      when(() => client.post(any(),body: any(named: 'body'))
+      when(() => client.post(any(),body: any(named: 'body'),headers: any(named: 'headers'))
       ).thenAnswer((_) async => http.Response('user created successfully',200));
       //act
       final call = remoteDataSource.createUser(
@@ -39,14 +39,17 @@ void main() {
         body: jsonEncode({
           'createdAt': createdAt,
           'name': name,
-          'avatar': avatar
-        })
+         // 'avatar': avatar
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
       )).called(1);
       
     });
     test('should return [ApiException] when status code is not 200 or 201', () async {
       //arrange
-      when(() => client.post(any(),body: any(named: 'body'))
+      when(() => client.post(any(),body: any(named: 'body'), headers: any(named: 'headers'))
       ).thenAnswer((_) async => http.Response('api error',500));
       // act
       final call = remoteDataSource.createUser(
@@ -63,14 +66,17 @@ void main() {
         body: jsonEncode({
           'createdAt': createdAt,
           'name': name,
-          'avatar': avatar
-        })
+          //'avatar': avatar
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
       )).called(1);
     });
 
     test('should return [ApiException] when http call fails', () async {
       //arrange
-      when(() => client.post(any(),body: any(named: 'body'))
+      when(() => client.post(any(),body: any(named: 'body'), headers: any(named: 'headers'))
       ).thenThrow(Exception());
       // act
       final call = remoteDataSource.createUser(
@@ -86,8 +92,11 @@ void main() {
         body: jsonEncode({
           'createdAt': createdAt,
           'name': name,
-          'avatar': avatar
-        })
+          //'avatar': avatar
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
       )).called(1);
     }); 
   });
